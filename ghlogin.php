@@ -1,34 +1,41 @@
 <?php
-session_start();
+// Get the temporary GitHub code from the request query parameters
 
-$client_id = '64db9b34101d94173ad9';
-$client_secret = '9c3f64aca4e175bfafc49c95e7bc930a1ca4af50';
-$redirect_uri = 'http://localhost:3000/ghlogin.php';
+$CLIENT_ID = 'febe1cf8420d5e54ed43';
+$CLIENT_SECRET = '708e71b0cef50b50dda6f034003e8f113b17b79f';
 
-if (isset($_GET['code'])) {
-    $code = $_GET['code'];
-    $token_url = "https://github.com/login/oauth/access_token?client_id=$client_id&client_secret=$client_secret&code=$code&redirect_uri=$redirect_uri";
-    $response = file_get_contents($token_url);
-    parse_str($response, $data);
+$sessionCode = $_GET['code'];
 
-    if (isset($data['access_token'])) {
-        $access_token = $data['access_token'];
-        $user_info_url = 'https://api.github.com/user';
-        $options = [
-            'http' => [
-                'header' => "Authorization: token $access_token"
-            ]
-        ];
-        $context = stream_context_create($options);
-        $user_info = json_decode(file_get_contents($user_info_url, false, $context), true);
+// Use cURL to make a POST request to GitHub to get an access token
+$curl = curl_init();
 
-        $_SESSION['user_email'] = $user_info['email'];
-        header('Location: uname.php');
-        exit();
-    } else {
-        echo 'Error in obtaining access token.';
-    }
-} else {
-    echo 'Error: Code parameter is missing.';
-}
+curl_setopt($curl, CURLOPT_URL, 'https://github.com/login/oauth/access_token');
+curl_setopt($curl, CURLOPT_POST, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query([
+    'client_id' => $CLIENT_ID,
+    'client_secret' => $CLIENT_SECRET,
+    'code' => $sessionCode,
+]));
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+$result = curl_exec($curl);
+curl_close($curl);
+
+// Extract the access token and granted scopes from the JSON response
+$jresult = json_decode($result, true);
+$accessToken = $jresult['access_token'];
+
+setcookie('access_token', $accessToken, 0, '/');
+// echo "the code is " + $sessionCode;
+
 ?>
+
+<!-- <pre>
+
+    <?php
+    echo $result;
+    ?>
+</pre> -->
+
+<span></span>
