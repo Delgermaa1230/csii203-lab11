@@ -2,7 +2,7 @@
 session_start();
 
 $client_id = '64db9b34101d94173ad9';
-$client_secret = 'YOUR_CLIENT_SECRET'; // Replace with your actual client secret
+$client_secret = '9c3f64aca4e175bfafc49c95e7bc930a1ca4af50';
 $redirect_uri = 'http://localhost:3000/ghlogin.php';
 
 if (isset($_GET['code'])) {
